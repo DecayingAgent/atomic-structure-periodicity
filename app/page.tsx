@@ -64,10 +64,10 @@ const NAV_ITEMS: Array<{ id: SectionId; label: string; eyebrow: string }> = [
 ];
 
 const ORBITALS: OrbitalSpec[] = [
-  { label: "s", l: 0, capacity: 2, shape: "sphere", description: "One spherical region around the nucleus." },
-  { label: "p", l: 1, capacity: 6, shape: "dumbbell", description: "Three orientations, each shaped like a two-lobed dumbbell." },
-  { label: "d", l: 2, capacity: 10, shape: "clover", description: "Five orientations; most have four lobes." },
-  { label: "f", l: 3, capacity: 14, shape: "flower", description: "Seven orientations with more complex multi-lobed shapes." },
+  { label: "s", l: 0, capacity: 2, shape: "s", description: "One spherical region around the nucleus." },
+  { label: "p", l: 1, capacity: 6, shape: "p", description: "Three orientations, each shaped like a two-lobed dumbbell." },
+  { label: "d", l: 2, capacity: 10, shape: "d", description: "Five orientations; most have four lobes." },
+  { label: "f", l: 3, capacity: 14, shape: "f", description: "Seven orientations with more complex multi-lobed shapes." },
 ];
 
 const ELEMENTS: ElementRecord[] = [
@@ -153,8 +153,36 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
   return <div className="metric"><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>;
 }
 
-function OrbitalVisual({ shape }: { shape: string }) {
-  return <div className={`orbital-visual shape-${shape}`} role="img" aria-label={`${shape} orbital CSS visualization`}><span /><span /><span /></div>;
+function OrbitalVisual({ shape, sShell, fShell }: { shape: string; sShell: number; fShell: "4f" | "5f" }) {
+  if (shape === "s") {
+    return <div className={`orbital-visual orbital-s shell-${sShell}`} role="img" aria-label={`${sShell}s orbital CSS visualization`}>
+      <span className="s-shell shell-outer" />
+      {sShell > 1 && <span className="s-shell shell-node node-one" />}
+      {sShell > 2 && <span className="s-shell shell-node node-two" />}
+      <span className="orbital-core" />
+    </div>;
+  }
+
+  if (shape === "p") {
+    return <div className="orbital-visual orbital-p" role="img" aria-label="p orbital CSS visualization">
+      <span className="orbital-lobe lobe-one" />
+      <span className="orbital-lobe lobe-two" />
+      <span className="orbital-core" />
+    </div>;
+  }
+
+  if (shape === "d") {
+    return <div className="orbital-visual orbital-d" role="img" aria-label="d orbital CSS visualization">
+      {Array.from({ length: 4 }, (_, index) => <span className={`orbital-lobe lobe-${index + 1}`} key={index} />)}
+      <span className="orbital-core" />
+    </div>;
+  }
+
+  return <div className={`orbital-visual orbital-f orbital-${fShell}`} role="img" aria-label={`${fShell} orbital CSS visualization`}>
+    {Array.from({ length: 6 }, (_, index) => <span className={`orbital-lobe lobe-${index + 1}`} key={index} />)}
+    {fShell === "5f" && <div className="f-inner-layer" aria-hidden="true">{Array.from({ length: 6 }, (_, index) => <span className={`orbital-lobe lobe-${index + 1}`} key={index} />)}</div>}
+    <span className="orbital-core" />
+  </div>;
 }
 
 export default function Home() {
@@ -166,6 +194,8 @@ export default function Home() {
   const [angular, setAngular] = useState(1);
   const [magnetic, setMagnetic] = useState(0);
   const [selectedOrbital, setSelectedOrbital] = useState("p");
+  const [sShell, setSShell] = useState(1);
+  const [fShell, setFShell] = useState<"4f" | "5f">("4f");
   const [selectedElement, setSelectedElement] = useState("Cr");
   const [trend, setTrend] = useState<TrendId>("ionization");
   const [alkaliMedium, setAlkaliMedium] = useState<"gas" | "water">("gas");
@@ -178,6 +208,9 @@ export default function Home() {
   const energy = photonEnergy(wavelength);
   const transition = hydrogenTransition(initialLevel, finalLevel);
   const chosenOrbital = ORBITALS.find((orbital) => orbital.label === selectedOrbital) ?? ORBITALS[0];
+  const orbitalTitle = selectedOrbital === "s" ? `${sShell}s SUBSHELL / l = 0` : selectedOrbital === "f" ? `${fShell.toUpperCase()} SUBSHELL / l = 3` : `${chosenOrbital.label.toUpperCase()} SUBSHELL / l = ${chosenOrbital.l}`;
+  const orbitalDescription = selectedOrbital === "f" ? fShell === "5f" ? "The same seven-orbital angular family, with an added radial node." : "Seven orientations built from alternating six-lobed phase patterns." : chosenOrbital.description;
+  const orbitalExplanation = selectedOrbital === "f" ? fShell === "5f" ? "The 5f set has one more radial node than 4f, so the inner phase-reversed layer appears closer to the nucleus." : "The 4f set has seven orbitals. Its angular pattern is multi-lobed, with neighboring lobes carrying opposite phase." : `A subshell with angular momentum quantum number l = ${chosenOrbital.l} contains ${2 * chosenOrbital.l + 1} orbital${chosenOrbital.l === 0 ? "" : "s"} and holds up to ${chosenOrbital.capacity} electrons.`;
   const quantumValid = quantumNumbersAreValid(principal, angular, magnetic);
   const element = ELEMENTS.find((item) => item.symbol === selectedElement) ?? ELEMENTS[0];
   const trendInfo = TREND_DATA[trend];
@@ -253,7 +286,7 @@ export default function Home() {
 
       <section id="hydrogen" className="dark-section page-section"><div className="section-wrap"><SectionHeading number="03" kicker="LAB 02 / QUANTIZED ENERGY" title="Hydrogen leaves fingerprints." >An electron can occupy only specific energy levels. A jump between levels creates a photon with a precise wavelength.</SectionHeading><CompletionButton id="hydrogen" completed={completed.has("hydrogen")} onComplete={completeSection} /><div className="hydrogen-grid"><div className="energy-ladder"><div className="ladder-label">ENERGY / J</div>{[1, 2, 3, 4, 5, 6].map((level) => <div className="energy-level" key={level} style={{ bottom: `${level === 1 ? 5 : 15 + (level - 2) * 14}%` }}><span>n = {level}</span><i /><small>{formatScientific(hydrogenEnergy(level))}</small></div>)}<div className="transition-line" style={{ bottom: `${15 + (initialLevel - 2) * 14}%`, height: `${Math.abs((15 + (initialLevel - 2) * 14) - (15 + (finalLevel - 2) * 14))}%` }} /><div className="nucleus-dot" /></div><div className="hydrogen-controls"><p className="eyebrow">SET A TRANSITION</p><div className="select-row"><label>Electron starts at <select value={initialLevel} onChange={(event) => setInitialLevel(Number(event.target.value))}>{[2, 3, 4, 5, 6].map((level) => <option key={level} value={level}>n = {level}</option>)}</select></label><label>Electron ends at <select value={finalLevel} onChange={(event) => setFinalLevel(Number(event.target.value))}>{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>n = {level}</option>)}</select></label></div><div className={`transition-card ${initialLevel > finalLevel ? "emission" : "absorption"}`}><span>{initialLevel > finalLevel ? "EMISSION" : initialLevel < finalLevel ? "ABSORPTION" : "NO JUMP"}</span><strong>{initialLevel === finalLevel ? "Choose two levels" : `${Math.abs(initialLevel - finalLevel)} level ${initialLevel > finalLevel ? "drop" : "rise"}`}</strong><p>{initialLevel === finalLevel ? "An electron must change levels to exchange energy." : `${formatScientific(transition.photonEnergy)} J photon · ${transition.wavelengthNm.toFixed(1)} nm`}</p></div><div className="hydrogen-note"><b>Why lines?</b> The allowed energies are discrete, so only certain photon energies—and therefore only certain colors—can appear.</div></div></div></div></section>
 
-      <section id="orbitals" className="lab-section page-section"><div className="section-wrap"><SectionHeading number="04" kicker="LAB 03 / QUANTUM NUMBERS" title="Orbitals are probability maps." >The four quantum numbers label an electron&apos;s address: shell, subshell, orientation, and spin. Test an address, then inspect its shape.</SectionHeading><CompletionButton id="orbitals" completed={completed.has("orbitals")} onComplete={completeSection} /><div className="orbital-grid"><div className="orbital-picker">{ORBITALS.map((orbital) => <button key={orbital.label} className={selectedOrbital === orbital.label ? "selected" : ""} onClick={() => { setSelectedOrbital(orbital.label); setAngular(orbital.l); setMagnetic(0); }}><b>{orbital.label}</b><span>l = {orbital.l}</span><small>{orbital.capacity} e⁻ max</small></button>)}</div><div className="orbital-view"><div className="orbital-stage"><OrbitalVisual shape={chosenOrbital.shape} /><div className="orbital-axis axis-x" /><div className="orbital-axis axis-y" /></div><div><p className="eyebrow">{chosenOrbital.label.toUpperCase()} SUBSHELL / l = {chosenOrbital.l}</p><h3>{chosenOrbital.description}</h3><p className="soft-copy">A subshell with angular momentum quantum number <b>l = {chosenOrbital.l}</b> contains {2 * chosenOrbital.l + 1} orbital{chosenOrbital.l === 0 ? "" : "s"} and holds up to {chosenOrbital.capacity} electrons.</p></div></div><div className="validator"><div className="validator-head"><span>ADDRESS VALIDATOR</span><strong className={quantumValid ? "valid" : "invalid"}>{quantumValid ? "VALID ADDRESS" : "INVALID ADDRESS"}</strong></div><div className="quantum-inputs"><label>n <input type="number" min="1" max="7" value={principal} onChange={(event) => setPrincipal(Number(event.target.value))} /></label><label>l <input type="number" min="0" max="6" value={angular} onChange={(event) => setAngular(Number(event.target.value))} /></label><label>mₗ <input type="number" min="-3" max="3" value={magnetic} onChange={(event) => setMagnetic(Number(event.target.value))} /></label></div><p>{quantumValid ? `Allowed: l = 0…${principal - 1}; for this l, mₗ ranges from −${angular} to +${angular}.` : `Check the rules: l must be 0 through n−1, and mₗ must be between −l and +l.`}</p></div></div></div></section>
+      <section id="orbitals" className="lab-section page-section"><div className="section-wrap"><SectionHeading number="04" kicker="LAB 03 / QUANTUM NUMBERS" title="Orbitals are probability maps." >The four quantum numbers label an electron&apos;s address: shell, subshell, orientation, and spin. Test an address, then inspect its shape.</SectionHeading><CompletionButton id="orbitals" completed={completed.has("orbitals")} onComplete={completeSection} /><div className="orbital-grid"><div className="orbital-picker">{ORBITALS.map((orbital) => <button key={orbital.label} className={selectedOrbital === orbital.label ? "selected" : ""} onClick={() => { setSelectedOrbital(orbital.label); setAngular(orbital.l); setMagnetic(0); }}><b>{orbital.label}</b><span>l = {orbital.l}</span><small>{orbital.capacity} e⁻ max</small></button>)}</div><div className="orbital-view"><div className="orbital-stage"><OrbitalVisual shape={chosenOrbital.shape} sShell={sShell} fShell={fShell} /><div className="orbital-axis axis-x" /><div className="orbital-axis axis-y" /></div><div><p className="eyebrow">{orbitalTitle}</p>{selectedOrbital === "s" && <div className="orbital-variant" role="group" aria-label="s orbital shell"><span>RADIAL MODEL</span>{[1, 2, 3].map((level) => <button key={level} className={sShell === level ? "selected" : ""} onClick={() => setSShell(level)}>{level}s</button>)}</div>}{selectedOrbital === "f" && <div className="orbital-variant" role="group" aria-label="f orbital radial model"><span>RADIAL MODEL</span>{(["4f", "5f"] as const).map((level) => <button key={level} className={fShell === level ? "selected" : ""} onClick={() => setFShell(level)}>{level}</button>)}</div>}<h3>{orbitalDescription}</h3><p className="soft-copy">{orbitalExplanation}</p></div></div><div className="validator"><div className="validator-head"><span>ADDRESS VALIDATOR</span><strong className={quantumValid ? "valid" : "invalid"}>{quantumValid ? "VALID ADDRESS" : "INVALID ADDRESS"}</strong></div><div className="quantum-inputs"><label>n <input type="number" min="1" max="7" value={principal} onChange={(event) => setPrincipal(Number(event.target.value))} /></label><label>l <input type="number" min="0" max="6" value={angular} onChange={(event) => setAngular(Number(event.target.value))} /></label><label>mₗ <input type="number" min="-3" max="3" value={magnetic} onChange={(event) => setMagnetic(Number(event.target.value))} /></label></div><p>{quantumValid ? `Allowed: l = 0…${principal - 1}; for this l, mₗ ranges from −${angular} to +${angular}.` : `Check the rules: l must be 0 through n−1, and mₗ must be between −l and +l.`}</p></div></div></div></section>
 
       <section id="configuration" className="dark-section page-section"><div className="section-wrap"><SectionHeading number="05" kicker="LAB 04 / ELECTRON CONFIGURATIONS" title="Build the address book." >Fill orbitals in the right order, never pair electrons too early, and remember that a few atoms trade energy for extra stability.</SectionHeading><CompletionButton id="configuration" completed={completed.has("configuration")} onComplete={completeSection} /><div className="configuration-grid"><div className="element-selector"><p className="eyebrow">SELECT AN ELEMENT</p><div className="element-buttons">{ELEMENTS.map((item) => <button key={item.symbol} className={selectedElement === item.symbol ? "selected" : ""} onClick={() => setSelectedElement(item.symbol)}><b>{item.symbol}</b><span>{item.atomicNumber}</span></button>)}</div><div className="selected-element"><span className="element-symbol">{element.symbol}</span><div><strong>{element.name}</strong><small>Z = {element.atomicNumber} · period {element.period} · group {element.group}</small><em>{element.category}</em></div></div></div><div className="configuration-readout"><p className="eyebrow">GROUND-STATE CONFIGURATION</p><div className="configuration-string">{element.configuration}</div><div className="orbital-boxes">{configurationRows.map((row) => <div className="orbital-box" key={row.orbital}><span>{row.orbital}</span><div>{Array.from({ length: row.capacity / 2 }, (_, index) => <i key={index} className={index < Math.ceil(row.electrons / 2) ? "filled" : ""}>{index < row.electrons ? (index % 2 === 0 ? "↑" : "↓") : ""}</i>)}</div><small>{row.electrons}/{row.capacity}</small></div>)}</div><div className="rule-strip"><span><b>AUFBAU</b> lowest energy first</span><span><b>PAULI</b> max two, opposite spins</span><span><b>HUND</b> spread before pairing</span></div>{(selectedElement === "Cr" || selectedElement === "Cu") && <div className="exception-callout"><b>{selectedElement} exception detected</b><span>{selectedElement === "Cr" ? "A half-filled 3d⁵ subshell is favored: [Ar] 4s¹ 3d⁵." : "A filled 3d¹⁰ subshell is favored: [Ar] 4s¹ 3d¹⁰."}</span></div>}</div></div></div></section>
 
@@ -265,3 +298,4 @@ export default function Home() {
     </main>
   );
 }
+
