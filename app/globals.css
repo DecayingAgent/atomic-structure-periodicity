@@ -145,11 +145,11 @@ select { background:var(--dark-2); border:1px solid var(--dark-line); color:var(
 .orbital-p .orbital-lobe { border-radius:58% 42% 48% 52%; height:78px; top:calc(50% - 39px); width:104px; }
 .orbital-p .lobe-one { background:linear-gradient(130deg,#ff8d56,#efc958); left:calc(50% - 94px); transform:rotate(180deg); }
 .orbital-p .lobe-two { background:linear-gradient(130deg,#92e0da,#4ec6c2); right:calc(50% - 94px); }
-.orbital-d .orbital-lobe { border-radius:70% 30% 58% 42%; height:68px; left:calc(50% - 34px); top:calc(50% - 34px); width:72px; }
-.orbital-d .lobe-1 { background:linear-gradient(135deg,#ff9a58,#f0c95c); transform:translate(-50%,-74px); }
-.orbital-d .lobe-2 { background:linear-gradient(135deg,#9ae3dc,#54c8c2); transform:translate(74px,-50%) rotate(90deg); }
-.orbital-d .lobe-3 { background:linear-gradient(135deg,#ff9a58,#e96f54); transform:translate(-50%,74px) rotate(180deg); }
-.orbital-d .lobe-4 { background:linear-gradient(135deg,#9ae3dc,#48b9ba); transform:translate(-74px,-50%) rotate(270deg); }
+.orbital-d .orbital-lobe { border-radius:55% 45% 45% 55% / 58% 58% 42% 42%; height:78px; left:calc(50% - 28px); top:calc(50% - 103px); width:56px; }
+.orbital-d .lobe-1 { background:linear-gradient(135deg,#ff9a58,#f0c95c); }
+.orbital-d .lobe-2 { background:linear-gradient(135deg,#9ae3dc,#54c8c2); left:calc(50% + 47px); top:calc(50% - 28px); transform:rotate(90deg); }
+.orbital-d .lobe-3 { background:linear-gradient(135deg,#ff9a58,#e96f54); top:calc(50% + 25px); transform:rotate(180deg); }
+.orbital-d .lobe-4 { background:linear-gradient(135deg,#9ae3dc,#48b9ba); left:calc(50% - 103px); top:calc(50% - 28px); transform:rotate(270deg); }
 .orbital-f .orbital-lobe { border-radius:54% 46% 46% 54%; height:82px; left:calc(50% - 27px); top:calc(50% - 104px); transform-origin:50% 104px; width:54px; }
 .orbital-f > .lobe-1,.orbital-f > .lobe-3,.orbital-f > .lobe-5 { background:linear-gradient(150deg,#ff9c5c,#ed6c54); }
 .orbital-f > .lobe-2,.orbital-f > .lobe-4,.orbital-f > .lobe-6 { background:linear-gradient(150deg,#a1e4dd,#51bfc0); }
