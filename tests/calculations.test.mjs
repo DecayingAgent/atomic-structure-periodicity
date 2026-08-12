@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   hydrogenTransition,
   quantumNumbersAreValid,
+  visibleColorAtWavelength,
   wavelengthToFrequency,
 } from "../app/chapter7-utils.ts";
 
@@ -18,4 +19,11 @@ test("quantum-number validator enforces shell and orientation bounds", () => {
   assert.equal(quantumNumbersAreValid(3, 1, -1), true);
   assert.equal(quantumNumbersAreValid(2, 2, 0), false);
   assert.equal(quantumNumbersAreValid(3, 1, 2), false);
+});
+
+test("visible-spectrum bands classify the reference wavelength ranges", () => {
+  assert.equal(visibleColorAtWavelength(449), "violet");
+  assert.equal(visibleColorAtWavelength(450), "blue");
+  assert.equal(visibleColorAtWavelength(604), "orange");
+  assert.equal(visibleColorAtWavelength(625), "red");
 });
