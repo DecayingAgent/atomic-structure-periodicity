@@ -111,11 +111,11 @@ input[type="range"] { accent-color:var(--orange); cursor:pointer; margin:24px 0 
 .energy-ladder { border-bottom:1px solid #6a8780; height:380px; position:relative; }
 .ladder-label { color:#77988d; font-family:"DM Mono",monospace; font-size:9px; position:absolute; top:-25px; }
 .energy-level { align-items:center; display:flex; gap:12px; left:0; position:absolute; right:0; }
-.energy-level span { color:#b9c8bf; font-family:"DM Mono",monospace; font-size:10px; width:40px; }
-.energy-level i { background:#8fe0da; box-shadow:0 0 10px rgba(143,224,218,.3); display:block; height:2px; width:100%; }
-.energy-level small { color:#6c8980; font-family:"DM Mono",monospace; font-size:9px; width:90px; }
+.energy-level span { color:#b9c8bf; flex:0 0 40px; font-family:"DM Mono",monospace; font-size:10px; }
+.energy-level i { background:#8fe0da; box-shadow:0 0 10px rgba(143,224,218,.3); display:block; flex:1 1 auto; height:2px; width:auto; }
+.energy-level small { color:#6c8980; flex:0 0 90px; font-family:"DM Mono",monospace; font-size:9px; }
 .nucleus-dot { background:var(--orange); border-radius:50%; bottom:0; height:8px; left:47px; position:absolute; width:8px; }
-.transition-line { background:var(--orange); left:58px; position:absolute; width:2px; }
+.transition-line { background:var(--orange); left:calc(40px + 12px); position:absolute; width:2px; }
 .hydrogen-controls { padding-top:10px; }
 .select-row { display:grid; gap:14px; grid-template-columns:1fr 1fr; margin:35px 0; }
 .dark-section label { color:#c8d3cc; }
